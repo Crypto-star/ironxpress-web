@@ -1,46 +1,139 @@
-# Getting Started with Create React App
+# IronXpress Web Application
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A responsive, multi-page website version of the IronXpress mobile app that provides on-demand ironing services. Built with React, TypeScript, Tailwind CSS, and Supabase.
 
-## Available Scripts
+## 🚀 Features
 
-In the project directory, you can run:
+### 🎨 UI/UX
+- **Responsive Design**: Mobile-first approach that scales to desktop/tablet
+- **Modern Interface**: Clean, app-like UI with smooth animations and transitions
+- **Theme Colors**: Deep Purple (#673AB7) and Electric Blue (#1565C0)
+- **Multilingual Support**: English, Hindi, and Odia with real-time switching
 
-### `npm start`
+### 📱 Pages & Functionality
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+#### 1. **Splash Screen**
+- Animated iron icon with glowing effects and steam
+- Sequential loading messages with progress indicator
+- Auto-redirect based on authentication status
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+#### 2. **Authentication**
+- Phone number + OTP authentication via Supabase
+- Two-tab interface (Login/Signup)
+- Real-time form validation
 
-### `npm test`
+#### 3. **Home Page**
+- Welcome banner with user greeting
+- Language selector with flag icons
+- Service categories (Electric Iron, Steam Iron, Coal Iron)
+- Product grid with "Add to Cart" functionality
+- Dynamic data loading from Supabase
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+#### 4. **Product Details**
+- Product images and descriptions
+- Service type selection
+- Quantity selector with price calculation
+- Detailed price breakdown
 
-### `npm run build`
+#### 5. **Cart Management**
+- Interactive cart with quantity controls
+- Coupon code application with validation
+- Real-time price calculations (taxes, delivery fees)
+- Empty state handling
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+#### 6. **Address & Delivery**
+- Address book management (CRUD operations)
+- Delivery slot selection (Morning/Afternoon/Evening)
+- Address form with validation
+- Map picker interface (mocked)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+#### 7. **Order Success**
+- Confirmation animation
+- Order ID display
+- Navigation back to home
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+#### 8. **Notifications**
+- Notification list with read/unread states
+- Different notification types (orders, promotions, general)
+- Time formatting and interaction
 
-### `npm run eject`
+#### 9. **Profile Management**
+- User information display
+- Language preference settings
+- Account security information
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+#### 10. **Support**
+- Contact options (phone, email, chat)
+- Support form with categorization
+- Expandable FAQ section
+- Emergency contact information
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 🛠️ Tech Stack
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+- **Frontend**: React 18 with TypeScript
+- **Styling**: Tailwind CSS with custom components
+- **Backend**: Supabase (PostgreSQL, Auth, Storage)
+- **Routing**: React Router DOM
+- **State Management**: React Context API
+- **Notifications**: React Hot Toast
+- **Icons**: Heroicons
+- **Build Tool**: Create React App
+- **Deployment Ready**: Optimized production builds
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+## 🚀 Getting Started
 
-## Learn More
+### 1. Install dependencies
+```bash
+npm install
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### 2. Start the development server
+```bash
+npm start
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+The application will open at `http://localhost:3000`
+
+### 3. Build for production
+```bash
+npm run build
+```
+
+## 📱 Database Integration
+
+The application integrates with your existing Supabase database:
+- **Supabase URL**: `https://qehtgclgjhzdlqcjujpp.supabase.co`
+- **Authentication**: Phone + OTP via Supabase Auth
+- **Real-time data**: Products, Cart, Orders, Addresses
+- **File uploads**: Product images via Supabase Storage
+
+## 🌍 Multilingual Support
+
+- **English** (en) - Default
+- **Hindi** (hi) - हिंदी
+- **Odia** (or) - ଓଡ଼ିଆ
+
+Language switching is instant and persists across sessions.
+
+## 🎯 Key Features Implemented
+
+✅ **Authentication Flow**: Phone/OTP with session management  
+✅ **Shopping Experience**: Browse, select, cart, checkout  
+✅ **Order Management**: Place orders with delivery scheduling  
+✅ **User Experience**: Responsive, animated, multilingual  
+✅ **Data Management**: Real-time updates with Supabase  
+
+## 📝 Available Scripts
+
+- `npm start` - Start development server
+- `npm run build` - Build for production
+- `npm test` - Run tests
+- `npm run eject` - Eject from Create React App
+
+## 🚀 Deployment
+
+The application is ready for deployment to Vercel, Netlify, or any static hosting service.
+
+---
+
+**Built with ❤️ for IronXpress using React, TypeScript, Tailwind CSS, and Supabase**
