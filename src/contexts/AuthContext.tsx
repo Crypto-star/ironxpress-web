@@ -9,6 +9,7 @@ interface AuthContextType {
   signInWithPhone: (phone: string) => Promise<void>
   signInWithEmail: (email: string, password: string) => Promise<void>
   signUpWithEmail: (email: string, password: string, fullName?: string) => Promise<void>
+  signInWithGoogle: () => Promise<void>
   verifyOTP: (phone: string, otp: string) => Promise<void>
   signOut: () => Promise<void>
 }
@@ -76,6 +77,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (error) throw error
   }
 
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/home`
+      }
+    })
+    if (error) throw error
+  }
+
   const verifyOTP = async (phone: string, otp: string) => {
     const { error } = await supabase.auth.verifyOtp({
       phone: phone,
@@ -97,6 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signInWithPhone,
     signInWithEmail,
     signUpWithEmail,
+    signInWithGoogle,
     verifyOTP,
     signOut,
   }
