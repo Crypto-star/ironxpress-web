@@ -25,7 +25,7 @@ const BottomNavigation: React.FC = () => {
     {
       key: 'home',
       label: t('common.home'),
-      path: '/home',
+      path: '/',
       icon: HomeIcon,
       activeIcon: HomeIconSolid
     },

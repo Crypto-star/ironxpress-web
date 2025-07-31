@@ -5,26 +5,33 @@ import { useLanguage, Language } from '../contexts/LanguageContext'
 import { useCart } from '../contexts/CartContext'
 import { supabase, Service, Product, Category } from '../lib/supabase'
 import BottomNavigation from '../components/BottomNavigation'
+import ServiceSelectionModal from '../components/ServiceSelectionModal'
 import toast from 'react-hot-toast'
 import { 
-  LanguageIcon, 
-  ChevronDownIcon,
+  ShoppingCartIcon,
+  BellIcon,
+  UserCircleIcon,
+  Bars3Icon,
   BoltIcon,
   CloudIcon,
-  FireIcon
+  FireIcon,
+  LanguageIcon,
+  ChevronDownIcon
 } from '@heroicons/react/24/outline'
 
 const HomePage: React.FC = () => {
   const [services, setServices] = useState<Service[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
-  const [selectedService, setSelectedService] = useState<Service | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
+  const [showServiceModal, setShowServiceModal] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false)
   const [loading, setLoading] = useState(true)
 
   const { user } = useAuth()
   const { language, setLanguage, t } = useLanguage()
-  const { addToCart } = useCart()
+  const { addToCart, addToSessionCart, cartCount } = useCart()
   const navigate = useNavigate()
 
   const languages = [
@@ -40,8 +47,13 @@ const HomePage: React.FC = () => {
   }
 
   useEffect(() => {
+    console.log('HomePage: Component mounted')
     fetchData()
   }, [])
+
+  useEffect(() => {
+    console.log('HomePage: User state changed:', { user: user?.email || 'guest', cartCount })
+  }, [user, cartCount])
 
   const fetchData = async () => {
     try {
@@ -56,7 +68,6 @@ const HomePage: React.FC = () => {
 
       if (servicesError) throw servicesError
       setServices(servicesData || [])
-      setSelectedService(servicesData?.[0] || null)
 
       // Fetch categories
       const { data: categoriesData, error: categoriesError } = await supabase
@@ -86,17 +97,37 @@ const HomePage: React.FC = () => {
     }
   }
 
-  const handleAddToCart = async (product: Product) => {
-    if (!selectedService) {
-      toast.error('Please select a service')
-      return
-    }
-
-    await addToCart(product, selectedService, 1)
+  const handleAddToCart = (product: Product) => {
+    setSelectedProduct(product)
+    setShowServiceModal(true)
   }
 
-  const handleProductClick = (product: Product) => {
-    navigate(`/product/${product.id}`)
+  const handleServiceSelection = (product: Product, service: Service, quantity: number) => {
+    if (user) {
+      addToCart(product, service, quantity)
+    } else {
+      addToSessionCart(product, service, quantity)
+    }
+    setShowServiceModal(false)
+    setSelectedProduct(null)
+  }
+
+  const filteredProducts = selectedCategory 
+    ? products.filter(product => product.category_id === selectedCategory.id)
+    : products
+
+  const handleCategorySelect = (category: Category) => {
+    setSelectedCategory(selectedCategory?.id === category.id ? null : category)
+  }
+
+  const handleCheckout = () => {
+    if (!user) {
+      // Redirect to auth page
+      navigate('/auth')
+    } else {
+      // Proceed to cart
+      navigate('/cart')
+    }
   }
 
   if (loading) {
@@ -112,156 +143,181 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-primary-600 to-electric-600 px-4 pt-12 pb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-white text-2xl font-bold">{t('home.welcome')}</h1>
-            <p className="text-white/80">Welcome to {t('app.name')}</p>
+      {/* Header - Responsive for Before/After Login States */}
+      <div className="bg-white shadow-sm px-4 py-3 sticky top-0 z-40">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center space-x-2">
+            <h1 className="text-xl font-bold text-primary-600">IronXpress</h1>
           </div>
-          
-          {/* Language Selector */}
-          <div className="relative">
-            <button
-              onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
-              className="flex items-center space-x-2 bg-white/20 text-white px-3 py-2 rounded-lg"
-            >
-              <LanguageIcon className="h-5 w-5" />
-              <span>{languages.find(l => l.code === language)?.flag}</span>
-              <ChevronDownIcon className="h-4 w-4" />
-            </button>
 
-            {showLanguageDropdown && (
-              <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg py-1 z-10 min-w-[120px]">
-                {languages.map((lang) => (
+          {/* Right Side - Different for Login States */}
+          <div className="flex items-center space-x-3">
+            {user ? (
+              // After Login: Cart, Notifications, Profile Icons
+              <>
+                <div className="flex items-center space-x-4">
                   <button
-                    key={lang.code}
-                    onClick={() => {
-                      setLanguage(lang.code)
-                      setShowLanguageDropdown(false)
-                    }}
-                    className={`w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 ${
-                      language === lang.code ? 'bg-primary-50 text-primary-600' : 'text-gray-700'
-                    }`}
+                    onClick={handleCheckout}
+                    className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
                   >
-                    <span>{lang.flag}</span>
-                    <span>{lang.name}</span>
+                    <ShoppingCartIcon className="h-6 w-6 text-gray-600" />
+                    {cartCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {cartCount}
+                      </span>
+                    )}
                   </button>
-                ))}
-              </div>
+                  <button
+                    onClick={() => navigate('/notifications')}
+                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  >
+                    <BellIcon className="h-6 w-6 text-gray-600" />
+                  </button>
+                  <button
+                    onClick={() => navigate('/profile')}
+                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  >
+                    <UserCircleIcon className="h-6 w-6 text-gray-600" />
+                  </button>
+                </div>
+              </>
+            ) : (
+              // Before Login: Login Button
+              <button
+                onClick={() => navigate('/auth')}
+                className="bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors"
+              >
+                Login
+              </button>
             )}
           </div>
         </div>
       </div>
 
-      {/* Services Section */}
-      <div className="px-4 -mt-4">
-        <div className="card mb-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">{t('home.services')}</h2>
-          <div className="grid grid-cols-3 gap-3">
-            {services.map((service) => {
-              const IconComponent = serviceIcons[service.name] || BoltIcon
-              const isSelected = selectedService?.id === service.id
-              
+      {/* Main Content */}
+      <div className="px-4 py-6">
+        {/* Banners Section */}
+        <div className="bg-gradient-to-r from-primary-600 to-blue-600 rounded-2xl p-6 mb-6 text-white">
+          <h2 className="text-xl font-bold mb-2">Get Started</h2>
+          <p className="text-white/90 mb-4">Professional laundry service at your doorstep</p>
+          <div className="flex space-x-2">
+            <button className="bg-white/20 px-4 py-2 rounded-lg text-sm font-medium">
+              Android
+            </button>
+            <button className="bg-white/20 px-4 py-2 rounded-lg text-sm font-medium">
+              iOS
+            </button>
+          </div>
+        </div>
+
+        {/* Choose Your Category */}
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Choose Your Category</h3>
+          
+          {/* Categories - Horizontal Scroll */}
+          <div className="grid grid-cols-5 gap-3 mb-6">
+            {categories.map((category) => {
+              const isSelected = selectedCategory?.id === category.id
               return (
                 <button
-                  key={service.id}
-                  onClick={() => setSelectedService(service)}
-                  className={`p-4 rounded-xl border-2 transition-all ${
+                  key={category.id}
+                  onClick={() => handleCategorySelect(category)}
+                  className={`flex flex-col items-center p-3 rounded-xl transition-all ${
                     isSelected
-                      ? 'border-primary-500 bg-primary-50'
-                      : 'border-gray-200 bg-white hover:border-gray-300'
+                      ? 'bg-primary-50 border-2 border-primary-500'
+                      : 'bg-white border border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2 ${
-                    isSelected
-                      ? 'bg-primary-100'
-                      : 'bg-gray-100'
+                  <div className={`w-12 h-12 rounded-full mb-2 flex items-center justify-center ${
+                    isSelected ? 'bg-primary-100' : 'bg-gray-100'
                   }`}>
-                    <IconComponent className={`h-6 w-6 ${
-                      isSelected ? 'text-primary-600' : 'text-gray-600'
-                    }`} />
+                    <img
+                      src={category.image_url || '/placeholder.png'}
+                      alt={category.name}
+                      className="w-8 h-8 object-cover rounded-full"
+                    />
                   </div>
-                  <p className={`text-sm font-medium ${
+                  <span className={`text-xs font-medium text-center ${
                     isSelected ? 'text-primary-600' : 'text-gray-700'
                   }`}>
-                    {t(`service.${service.name.toLowerCase().replace(' ', '_')}`)}
-                  </p>
-                  <p className={`text-xs ${
-                    isSelected ? 'text-primary-500' : 'text-gray-500'
-                  }`}>
-                    ₹{service.price}
-                  </p>
+                    {category.name}
+                  </span>
                 </button>
               )
             })}
           </div>
         </div>
-      </div>
 
-      {/* Categories */}
-      {categories.length > 0 && (
-        <div className="px-4 mb-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-3">Categories</h3>
-          <div className="flex space-x-3 overflow-x-auto pb-2">
-            {categories.map((category) => (
-              <div
-                key={category.id}
-                className="flex-shrink-0 w-20 text-center"
-              >
-                <div className="w-16 h-16 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center mx-auto mb-2">
-                  <img
-                    src={category.image_url || '/placeholder.png'}
-                    alt={category.name}
-                    className="w-10 h-10 object-cover rounded-full"
-                  />
-                </div>
-                <p className="text-xs font-medium text-gray-700">{category.name}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Products Grid */}
-      <div className="px-4">
-        <h3 className="text-lg font-semibold text-gray-800 mb-3">Popular Items</h3>
+        {/* Products Grid */}
         <div className="grid grid-cols-2 gap-4">
-          {products.map((product) => (
-            <div key={product.id} className="card">
-              <div 
-                onClick={() => handleProductClick(product)}
-                className="cursor-pointer"
-              >
+          {filteredProducts.map((product) => (
+            <div key={product.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div className="aspect-square">
                 <img
                   src={product.image_url || '/placeholder.png'}
                   alt={product.product_name}
-                  className="w-full h-32 object-cover rounded-lg mb-3"
+                  className="w-full h-full object-cover"
                 />
-                <h4 className="font-medium text-gray-800 mb-1">{product.product_name}</h4>
-                <p className="text-sm text-gray-600 mb-2">₹{product.product_price}</p>
               </div>
-              
-              <button
-                onClick={() => handleAddToCart(product)}
-                className="btn-primary w-full text-sm py-2"
-                disabled={!selectedService}
-              >
-                {t('common.add_to_cart')}
-              </button>
+              <div className="p-3">
+                <h4 className="font-medium text-gray-800 mb-1 text-sm">{product.product_name}</h4>
+                <p className="text-sm text-gray-600 mb-3">₹{product.product_price}</p>
+                <button
+                  onClick={() => handleAddToCart(product)}
+                  className="w-full bg-primary-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
+                >
+                  Add to cart
+                </button>
+              </div>
             </div>
           ))}
         </div>
+
+        {/* Empty State */}
+        {filteredProducts.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-gray-400 mb-4">
+              <BoltIcon className="h-16 w-16 mx-auto" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-600 mb-2">
+              {selectedCategory ? 'No items in this category' : 'No products available'}
+            </h3>
+            <p className="text-gray-500">
+              {selectedCategory ? 'Try selecting a different category' : 'Check back later for new items!'}
+            </p>
+            {selectedCategory && (
+              <button
+                onClick={() => setSelectedCategory(null)}
+                className="mt-4 text-primary-600 font-medium"
+              >
+                Show all products
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Empty State */}
-      {products.length === 0 && (
-        <div className="px-4 text-center py-12">
-          <div className="text-gray-400 mb-4">
-            <BoltIcon className="h-16 w-16 mx-auto" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-600 mb-2">No products available</h3>
-          <p className="text-gray-500">Check back later for new items!</p>
+      {/* Service Selection Modal */}
+      <ServiceSelectionModal
+        isOpen={showServiceModal}
+        onClose={() => setShowServiceModal(false)}
+        services={services}
+        product={selectedProduct}
+        onAddToCart={handleServiceSelection}
+      />
+
+      {/* Support Chatbot - Only show after login */}
+      {user && (
+        <div className="fixed bottom-24 right-4 z-50">
+          <button
+            onClick={() => navigate('/support')}
+            className="bg-primary-600 text-white p-3 rounded-full shadow-lg hover:bg-primary-700 transition-colors"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+          </button>
         </div>
       )}
 
