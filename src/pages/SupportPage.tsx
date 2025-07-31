@@ -8,7 +8,8 @@ import {
   EnvelopeIcon,
   ChatBubbleLeftRightIcon,
   ChevronDownIcon,
-  ChevronUpIcon
+  ChevronUpIcon,
+  LifebuoyIcon
 } from '@heroicons/react/24/outline'
 
 interface FAQ {
@@ -24,7 +25,7 @@ const SupportPage: React.FC = () => {
   const [contactType, setContactType] = useState('general')
   const [loading, setLoading] = useState(false)
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null)
-
+  
   const contactOptions = [
     { value: 'general', label: 'General Inquiry' },
     { value: 'order', label: 'Order Related' },
@@ -98,7 +99,7 @@ const SupportPage: React.FC = () => {
             <ArrowLeftIcon className="h-6 w-6 text-gray-700" />
           </button>
           <h1 className="ml-3 text-lg font-semibold text-gray-800">
-            {t('support.title')}
+            Support
           </h1>
         </div>
       </div>
@@ -169,7 +170,7 @@ const SupportPage: React.FC = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('support.message')}
+                Message
               </label>
               <textarea
                 value={message}
@@ -186,7 +187,7 @@ const SupportPage: React.FC = () => {
               disabled={loading}
               className="btn-primary w-full"
             >
-              {loading ? 'Sending...' : t('support.send')}
+              {loading ? 'Sending...' : 'Send Message'}
             </button>
           </form>
         </div>
@@ -194,7 +195,7 @@ const SupportPage: React.FC = () => {
         {/* FAQs */}
         <div className="card">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">
-            {t('support.faqs')}
+            Frequently Asked Questions
           </h2>
           
           <div className="space-y-3">

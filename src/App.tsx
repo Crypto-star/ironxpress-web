@@ -29,7 +29,8 @@ function App() {
           <Router>
             <Routes>
               {/* Public Routes */}
-              <Route path="/" element={<LandingPage />} />
+              <Route path="/" element={<HomePage />} />
+              <Route path="/home" element={<HomePage />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/terms" element={<TermsAndConditions />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
@@ -37,7 +38,6 @@ function App() {
               
               {/* Protected Routes */}
               <Route path="/splash" element={<ProtectedRoute><SplashScreen /></ProtectedRoute>} />
-              <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
               <Route path="/product/:id" element={<ProtectedRoute><ProductDetailsPage /></ProtectedRoute>} />
               <Route path="/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
               <Route path="/address" element={<ProtectedRoute><AddressPickerPage /></ProtectedRoute>} />

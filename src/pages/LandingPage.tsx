@@ -305,7 +305,7 @@ const LandingPage: React.FC = () => {
                           </span>
                         )}
                         <p className="text-gray-500 text-sm mt-1">
-                          {index === 0 ? '₹40' : `₹40 + ₹${service.price.replace('₹', '')}`}
+                          {index === 0 ? '₹40' : `₹40 + ₹${typeof service.price === 'number' ? service.price : parseFloat(String(service.price).replace('₹', '')) || 0}`}
                         </p>
                       </div>
                     </div>
