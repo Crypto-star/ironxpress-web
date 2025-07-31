@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import { useCart } from '../contexts/CartContext'
 import { useLanguage } from '../contexts/LanguageContext'
 import { supabase, Coupon } from '../lib/supabase'
@@ -15,7 +16,18 @@ import {
 } from '@heroicons/react/24/outline'
 
 const CartPage: React.FC = () => {
-  const { cartItems, cartTotal, cartCount, updateQuantity, removeFromCart, loading } = useCart()
+  const { user } = useAuth()
+  const { 
+    cartItems, 
+    sessionCartItems, 
+    cartTotal, 
+    cartCount, 
+    updateQuantity, 
+    updateSessionQuantity,
+    removeFromCart, 
+    removeFromSessionCart,
+    loading 
+  } = useCart()
   const { t } = useLanguage()
   const navigate = useNavigate()
   
@@ -28,16 +40,27 @@ const CartPage: React.FC = () => {
   const platformFee = 0
   const taxRate = 0.12
   
+  // Get current cart items (either from database or session)
+  const currentCartItems = user ? cartItems : sessionCartItems
+  
   const subtotal = cartTotal
   const taxAmount = subtotal * taxRate
   const finalTotal = subtotal + deliveryFee + platformFee + taxAmount - discount
 
   const handleQuantityChange = async (itemId: string, newQuantity: number) => {
-    await updateQuantity(itemId, newQuantity)
+    if (user) {
+      await updateQuantity(itemId, newQuantity)
+    } else {
+      updateSessionQuantity(itemId, newQuantity)
+    }
   }
 
   const handleRemoveItem = async (itemId: string) => {
-    await removeFromCart(itemId)
+    if (user) {
+      await removeFromCart(itemId)
+    } else {
+      removeFromSessionCart(itemId)
+    }
   }
 
   const handleApplyCoupon = async () => {
@@ -108,10 +131,18 @@ const CartPage: React.FC = () => {
   }
 
   const handleProceedToCheckout = () => {
-    if (cartItems.length === 0) {
+    if (currentCartItems.length === 0) {
       toast.error('Your cart is empty')
       return
     }
+    
+    // Check if user is authenticated, if not redirect to auth
+    if (!user) {
+      toast.error('Please login to proceed with checkout')
+      navigate('/auth', { state: { from: '/cart' } })
+      return
+    }
+    
     navigate('/address')
   }
 
@@ -146,7 +177,7 @@ const CartPage: React.FC = () => {
       </div>
 
       <div className="p-4">
-        {cartItems.length === 0 ? (
+        {currentCartItems.length === 0 ? (
           /* Empty Cart */
           <div className="text-center py-16">
             <ShoppingBagIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
@@ -165,7 +196,7 @@ const CartPage: React.FC = () => {
           <>
             {/* Cart Items */}
             <div className="space-y-4 mb-6">
-              {cartItems.map((item) => (
+              {currentCartItems.map((item) => (
                 <div key={item.id} className="card">
                   <div className="flex items-start space-x-4">
                     <img
@@ -298,7 +329,7 @@ const CartPage: React.FC = () => {
       </div>
 
       {/* Fixed Bottom Button */}
-      {cartItems.length > 0 && (
+      {currentCartItems.length > 0 && (
         <div className="fixed bottom-16 left-0 right-0 bg-white border-t border-gray-200 p-4">
           <button
             onClick={handleProceedToCheckout}

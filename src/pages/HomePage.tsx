@@ -121,13 +121,8 @@ const HomePage: React.FC = () => {
   }
 
   const handleCheckout = () => {
-    if (!user) {
-      // Redirect to auth page
-      navigate('/auth')
-    } else {
-      // Proceed to cart
-      navigate('/cart')
-    }
+    // Always go to cart - authentication will be handled there when needed
+    navigate('/cart')
   }
 
   if (loading) {
@@ -183,13 +178,26 @@ const HomePage: React.FC = () => {
                 </div>
               </>
             ) : (
-              // Before Login: Login Button
-              <button
-                onClick={() => navigate('/auth')}
-                className="bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors"
-              >
-                Login
-              </button>
+              // Before Login: Cart Icon and Login Button
+              <>
+                <button
+                  onClick={handleCheckout}
+                  className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <ShoppingCartIcon className="h-6 w-6 text-gray-600" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {cartCount}
+                    </span>
+                  )}
+                </button>
+                <button
+                  onClick={() => navigate('/auth')}
+                  className="bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors"
+                >
+                  Login
+                </button>
+              </>
             )}
           </div>
         </div>

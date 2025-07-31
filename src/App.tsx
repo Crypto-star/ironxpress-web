@@ -39,7 +39,7 @@ function App() {
               {/* Protected Routes */}
               <Route path="/splash" element={<ProtectedRoute><SplashScreen /></ProtectedRoute>} />
               <Route path="/product/:id" element={<ProtectedRoute><ProductDetailsPage /></ProtectedRoute>} />
-              <Route path="/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
+              <Route path="/cart" element={<CartPage />} />
               <Route path="/address" element={<ProtectedRoute><AddressPickerPage /></ProtectedRoute>} />
               <Route path="/order-success" element={<ProtectedRoute><OrderSuccessPage /></ProtectedRoute>} />
               <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
